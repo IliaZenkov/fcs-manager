@@ -8,7 +8,7 @@ import pandas as pd
 #######################################################################################################################
 
 
-class convertFCS():
+class convertFCS:
     """
     Contains methods and attributes to read and hold data from an FCS file
 
@@ -23,10 +23,11 @@ class convertFCS():
     self.data: NumPy ndarray[total number of events, number of channels/parameters]: Contains data from $BEGINDATA to $ENDDATA section of FCS file
     self.channel_names: Contains the names of the scattering and fluorescence channels included in the experiment run
     """
+
     def __init__(self, fcs, sample_number):
         self.data = None
         # Default FCS standard uses '$PnN' to refer to (short) names of acquisition channels
-        self.channel_name = '$PnN'
+        self.channel_name = "$PnN"
 
         # Initialize variables to hold attributes from $TEXT fields from the FCS file
         self.data_start = -1
@@ -36,7 +37,7 @@ class convertFCS():
         self.text_keywords = {}
 
         self.fcs = fcs
-        with open(fcs, 'rb') as fcs:
+        with open(fcs, "rb") as fcs:
             fcs.seek(0, 2)
             fcs.seek(0)
             data_segments = 0
@@ -46,10 +47,9 @@ class convertFCS():
                 self.read_header(fcs, data_offset)
                 self.read_text(fcs)
                 data_segments += 1
-                data_offset = self.text_keywords['$NEXTDATA']
+                data_offset = self.text_keywords["$NEXTDATA"]
                 fcs.seek(data_offset)
                 self.read_data(fcs)
-
 
     def read_header(self, fcs, data_offset=0):
         """
@@ -69,13 +69,17 @@ class convertFCS():
         # Ignore first 10 bytes of HEADER contain FCS file format followed by 4 spaces
         fcs.read(10)
 
-        for text in ('$BEGINSTEXT', '$ENDSTEXT', '$BEGINDATA', '$ENDDATA',):
+        for text in (
+            "$BEGINSTEXT",
+            "$ENDSTEXT",
+            "$BEGINDATA",
+            "$ENDDATA",
+        ):
             text_offset = int(fcs.read(8))
             self.text_keywords[text] = text_offset + data_offset
 
-        self.data_start = self.text_keywords['$BEGINDATA']
-        self.data_end = self.text_keywords['$BEGINDATA']
-
+        self.data_start = self.text_keywords["$BEGINDATA"]
+        self.data_end = self.text_keywords["$BEGINDATA"]
 
     def read_text(self, fcs):
         """
@@ -83,21 +87,29 @@ class convertFCS():
         :param fcs: current byte-offset position in FCS file
         :return: None
         """
-        fcs.seek(self.text_keywords['$BEGINSTEXT'], 0)
-        text = fcs.read(self.text_keywords['$ENDSTEXT'] - self.text_keywords['$BEGINSTEXT'] + 1)
-        text = text.decode(encoding="utf-8") # $TEXT keywords in the FCS standard are UTF-8 encoded
+        fcs.seek(self.text_keywords["$BEGINSTEXT"], 0)
+        text = fcs.read(
+            self.text_keywords["$ENDSTEXT"] - self.text_keywords["$BEGINSTEXT"] + 1
+        )
+        text = text.decode(
+            encoding="utf-8"
+        )  # $TEXT keywords in the FCS standard are UTF-8 encoded
 
         # delimiters are sometimes used as escape chars in FCS files
         # To avoid misinterpreting escaped delimiters as actual delimiters, we should split the text on double (escaped) delimiters first, followed by splitting on actual delimiters
         # We record the data between the delimiters at either end of each text segment (text[1:-1])
-        delim = text[0] # text segments start with the delimiter used for the whole FCS file
-        text_segment_sublists = [text.split(delim) for text in text[1:-1].split(delim * 2)]
+        delim = text[
+            0
+        ]  # text segments start with the delimiter used for the whole FCS file
+        text_segment_sublists = [
+            text.split(delim) for text in text[1:-1].split(delim * 2)
+        ]
 
         # Start the list of text segments with the first sublist, then extend it for each successive sublist
         text_segments = text_segment_sublists[0]
         # Now combine adjacent sublists (produced by double delimiters) back into whole text segments
         for segment_sublist in text_segment_sublists[1:]:
-            text_segments[-1] += (delim + segment_sublist[0])
+            text_segments[-1] += delim + segment_sublist[0]
             text_segments.extend(segment_sublist[1:])
         # In the now-flattened list text_keywords we have even elements as keys, and odd elements as values
         keys, values = text_segments[0::2], text_segments[1::2]
@@ -106,8 +118,10 @@ class convertFCS():
 
         # Don't forget to convert keys in self.text_keywords which encode bit values into integers
         # $PnB is FCS standard for bits reserved for each parameter (channel)
-        bit_keys = [f'$P{i}B' for i in self.channel_nums]
-        bit_keys.extend(['$NEXTDATA', '$PAR', '$TOT'])  # These text keywords giving byte offsets are also encoded as bits
+        bit_keys = [f"$P{i}B" for i in self.channel_nums]
+        bit_keys.extend(
+            ["$NEXTDATA", "$PAR", "$TOT"]
+        )  # These text keywords giving byte offsets are also encoded as bits
         for key in bit_keys:
             value = self.text_keywords[key]
             self.text_keywords[key] = int(value)
@@ -115,26 +129,27 @@ class convertFCS():
         # Find how many flow acquisition channels were enabled (i.e. included parameters as in FCS standard)
         # $PAR: FCS standard keyword for parameters (channels) recorded for each event i.e. included channels numbers
         # Channel numbers start from 1 on the FACSAria, FACSCalibur, and Guava easyCyte flow cytometers (may not be true for other cytometer models/setups!)
-        num_channels = int(self.text_keywords['$PAR'])
+        num_channels = int(self.text_keywords["$PAR"])
         self.channel_nums = range(1, num_channels + 1)
 
         # Find names of acquisition channels from $PnN keyword (i.e. parameter names as in FCS standard)
-        self.channel_names = ([self.text_keywords[f'$P{i}N'] for i in self.channel_nums])
+        self.channel_names = [self.text_keywords[f"$P{i}N"] for i in self.channel_nums]
 
         # Don't forget to convert keys in self.text_keywords which encode bit values into integers
         # $PnB is FCS standard for bits reserved for each parameter (channel)
-        bit_keys = [f'$P{i}B' for i in self.channel_nums]
-        bit_keys.extend(['$NEXTDATA', '$PAR', '$TOT'])  # These text keywords giving byte offsets are also encoded as bits
+        bit_keys = [f"$P{i}B" for i in self.channel_nums]
+        bit_keys.extend(
+            ["$NEXTDATA", "$PAR", "$TOT"]
+        )  # These text keywords giving byte offsets are also encoded as bits
         for key in bit_keys:
             value = self.text_keywords[key]
             self.text_keywords[key] = int(value)
 
         ##### Update $BEGINDATA segments if needed
         if self.data_start == 0:
-            self.data_start = int(text['$BEGINDATA'])
+            self.data_start = int(text["$BEGINDATA"])
         if self.data_end == 0:
-            self.data_end = int(text['$ENDDATA'])
-
+            self.data_end = int(text["$ENDDATA"])
 
     def read_data(self, fcs):
         """
@@ -145,19 +160,24 @@ class convertFCS():
         text = self.text_keywords
 
         # $TOT: FCS keyword for number of events in the data set
-        num_events = text['$TOT']
+        num_events = text["$TOT"]
         # $PAR: FCS keyword for Parameters (channels) recorded for each event i.e. enabled channels in the experiment
-        num_params = text['$PAR']
+        num_params = text["$PAR"]
 
         # The following block attempts to catch an FCS file with mixed datatypes for different acquisition channels
         # This should not be the case, but if it is - then this will prevent a corrupt output from a valid FCS file making its way into analysis
         # $PnB: FCS standard for number of ****BITS**** reserved for parameter number n i.e. for data recorded by each channel
-        reserved_bytes = [int(text[f'$P{i}B'] / 8) for i in self.channel_nums]
+        reserved_bytes = [int(text[f"$P{i}B"] / 8) for i in self.channel_nums]
         # FCS $DATATYPE keyword uses $DATATYPE='D' or $DATATYPE='F' to refer to floats, and $DATATYPE='I' to integers
         # We can use a dictionary in a clever way to convert the FCS datatypes to NumPy compatible dtypes, like so:
-        param_dtype = {'I': 'u', 'D': 'f', 'F': 'f'}[text['$DATATYPE']]
-        parameter_data_dtypes = [f'{param_dtype}{parameter_bytes}' for parameter_bytes in reserved_bytes]
-        if len(set(parameter_data_dtypes)) > 1: raise NameError('Mixed data types across FCS channels; check instrument settings')
+        param_dtype = {"I": "u", "D": "f", "F": "f"}[text["$DATATYPE"]]
+        parameter_data_dtypes = [
+            f"{param_dtype}{parameter_bytes}" for parameter_bytes in reserved_bytes
+        ]
+        if len(set(parameter_data_dtypes)) > 1:
+            raise NameError(
+                "Mixed data types across FCS channels; check instrument settings"
+            )
 
         fcs.seek(self.data_start, 0)  # Go back to $BEGINDATA
 
