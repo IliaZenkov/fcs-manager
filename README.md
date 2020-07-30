@@ -6,4 +6,4 @@ Since then, I've used this FCS Manager to produce results gone on to at least on
 
 Safe to use with FCS3.0 and FCS3.1 files. If you intend to use FCS Manager in your research, I strongly urge you to cross-check your analyses with FlowJo or similar flow package before integrating this code into your project.
 
-Feel free to copy, modify, and use as you see fit.
+Feel free to copy, modify, and use as you see fit!
