@@ -1,4 +1,4 @@
-I first developed FCS Manager for my research position at McGill University in 2018 to convert FCS files into PANDAS dataframes for easier exploratory analysis than was available using FlowJo at the time. 
+I first developed FCS Manager for my research position at McGill University in 2018 to convert FCS files into PANDAS DataFrames for easier exploratory analysis than was available using FlowJo at the time. 
 
 I used FCS Manager as a proof-of-concept to test automation capabilities for a high-throughput antibody screening data pipeline. Since then, I've used this FCS Manager to produce analyses included in at least one high-level grant application. 
 
