@@ -11,7 +11,7 @@ Install requirements using terminal/command line:
 pip install -r requirements.txt
 ```
 
-Where ```fcs``` is the path to an FCS file e.g. ```'./data/experiment.fcs'``` and ```sample_number``` is the number of samples represented in that FCS file, usually ```0``` for single-experiment files, though some machines record multiple experiment data in a wrapper FCS file, with a subfolder containing individual FCS files - in which case ```sample_number``` would be ```30``` if 30 experiments (individual FCS files) contained in the wrapper FCS file.
+For usage, ```fcs``` is the path to an FCS file e.g. ```'./data/experiment.fcs'``` and ```sample_number``` is the number of samples represented in that FCS file, usually ```0``` for single-experiment files, though some machines record multiple experiment data in a wrapper FCS file, with a subfolder containing individual FCS files - in which case ```sample_number``` would be ```30``` if 30 experiments (individual FCS files) contained in the wrapper FCS file.
 
 Activate Python by typing ```Python``` into a terminal/command line and then
 ```
