@@ -13,10 +13,6 @@ import fcs_manager
 fcs_manager.convertDF(fcs, sample_number)
 ```
 
-
-
-Feel free to copy, modify, use, and distribute as you see fit.
-
 ## Cite
 If you find this work useful in your own research, please cite as follows:
 
@@ -31,5 +27,6 @@ If you find this work useful in your own research, please cite as follows:
 }
 ```
 ## Licence
+Feel free to copy, modify, use, and distribute as you see fit.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/IliaZenkov/fcs-manager/blob/master/LICENSE)
