@@ -192,7 +192,7 @@ def convertDF(fcs, sample_number=0):
     """
     Runs convertFCS to create an FCSdata object containing flow data from FCS file
     Converts data values and keys (channel names) to a PANDAS dataframe
-    :param sample_number:
+    :param sample_number: number of samples represented in the FCS file 
     :return: PANDAS dataframe object
     """
     # Create an FCSdata object holding data from the FCS file
